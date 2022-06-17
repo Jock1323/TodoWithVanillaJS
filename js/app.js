@@ -2,22 +2,43 @@
 const elForm=document.querySelector('.form');
 const elInput=document.querySelector('.input');
 const elList=document.querySelector('.list');
+const elAllBtn=document.querySelector('.btn__all');
+const elCompletedBtn=document.querySelector('.btn__completed')
+const elUncompletedBtn=document.querySelector('.btn__uncompleted')
+const elAllBtnNumber=document.querySelector('.btn__all-number');
+const elCompletedBtnNumber=document.querySelector('.btn__completed-number');
+const elUncompletedBtnNumber=document.querySelector('.btn__uncompleted-number');
 
 let todoArr=[];
+let completed=[];
+let counter=0;
 elList.addEventListener('click',evt=>{
     let btnConnectId=evt.target.dataset.deleteBtnID*1
     let todoItemIndex=todoArr.findIndex(todoItem=>todoItem.id===btnConnectId);
-    if(evt.target.matches('.delete')){
-        todoArr.splice(todoItemIndex,1);
-        elList.innerHTML='';
-        renderList(todoArr,elList);
-    }
-    else if(evt.target.matches('.delete-chekbox')){
-        let checkboxConnectId=evt.target.dataset.deleteCheckboxID*1
-        let todoItemObj=todoArr.find(item=>item.id===checkboxConnectId);
+    let checkboxConnectId=evt.target.dataset.deleteCheckboxID*1
+    let todoItemObj=todoArr.find(item=>item.id===checkboxConnectId);
+     if(evt.target.matches('.delete-chekbox')){
         todoItemObj.isComplited=!todoItemObj.isComplited;
+        if(todoItemObj.isComplited){
+            counter++
+        }
+        else{
+            counter--;
+        }
+        elCompletedBtnNumber.textContent=`(${counter})`
+        elUncompletedBtnNumber.textContent=`(${todoArr.length-counter})`;
         elList.innerHTML=null;
         renderList(todoArr,elList)
+    }
+    else if(evt.target.matches('.delete')){
+        if(evt.target.matches('.checkbtn')){
+            counter--
+        }
+        elCompletedBtnNumber.textContent=`(${counter})`
+        todoArr.splice(todoItemIndex,1);
+        elUncompletedBtnNumber.textContent=`(${todoArr.length-counter})`;
+        elList.innerHTML='';
+        renderList(todoArr,elList);
     }
 })
 // btn click
@@ -30,6 +51,7 @@ elForm.addEventListener('submit',evt=>{
         isComplited:false
     }
     todoArr.push(todoItem);
+    elUncompletedBtnNumber.textContent=`(${todoArr.length-counter})`;
     elInput.value=null
     elList.innerHTML=null
     renderList(todoArr,elList);
@@ -69,6 +91,7 @@ let renderList=(fullArray,htmlElement)=>{
         if(element.isComplited){
             newCheckbox.checked=true;
             newItem.style.textDecoration = "line-through";
+            newBtn.classList.add('checkbtn')
         }
         // initialize elements
         htmlElement.appendChild(newItem);
@@ -76,4 +99,24 @@ let renderList=(fullArray,htmlElement)=>{
         newDiv.appendChild(newCheckbox)
         newDiv.appendChild(newBtn);
     });
+    if(todoArr.length===0){
+        elAllBtnNumber.textContent='(0)';
+       }
+       else{
+        elAllBtnNumber.textContent=`(${todoArr.length})`;
+       }
 }
+elAllBtn.addEventListener('click',()=>{
+    elList.innerHTML=null;
+    renderList(todoArr,elList)
+})
+elCompletedBtn.addEventListener('click',()=>{
+    let completed=todoArr.filter(item=>item.isComplited==true)
+    elList.innerHTML=null;
+    renderList(completed,elList)
+})
+elUncompletedBtn.addEventListener('click',()=>{
+    let uncompleted=todoArr.filter(item=>item.isComplited==false)
+    elList.innerHTML=null;
+    renderList(uncompleted,elList)
+})
